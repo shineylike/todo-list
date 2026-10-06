@@ -44,13 +44,16 @@ def _validate_tasks(tasks: object) -> List[Task]:
 
 
 def load_tasks(file_path: FilePath = TASKS_FILE) -> List[Task]:
-    """Încarcă sarcinile; dacă fișierul nu există, întoarce o listă goală."""
+    """Încarcă sarcinile; un fișier absent sau gol reprezintă o listă goală."""
     path = Path(file_path)
     if not path.exists():
         return []
 
     with path.open("r", encoding="utf-8") as tasks_file:
-        return _validate_tasks(json.load(tasks_file))
+        contents = tasks_file.read()
+    if not contents.strip():
+        return []
+    return _validate_tasks(json.loads(contents))
 
 
 def save_tasks(tasks: List[Task], file_path: FilePath = TASKS_FILE) -> None:
@@ -95,6 +98,18 @@ def mark_task_completed(task_id: int, file_path: FilePath = TASKS_FILE) -> Task:
     for task in tasks:
         if task["id"] == task_id:
             task["completed"] = True
+            save_tasks(tasks, file_path)
+            return task
+    raise LookupError("Sarcina solicitată nu există.")
+
+
+def toggle_task(task_id: int, file_path: FilePath = TASKS_FILE) -> Task:
+    """Inversează starea sarcinii și întoarce sarcina actualizată."""
+    _validate_task_id(task_id)
+    tasks = load_tasks(file_path)
+    for task in tasks:
+        if task["id"] == task_id:
+            task["completed"] = not task["completed"]
             save_tasks(tasks, file_path)
             return task
     raise LookupError("Sarcina solicitată nu există.")
