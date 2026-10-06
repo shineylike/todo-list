@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ro">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="todo-card">
+        <h1>To-Do List</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages" role="alert">
+                    {% for category, message in messages %}
+                        <li class="flash-message flash-{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <form class="add-form" action="{{ url_for('add') }}" method="post">
+            <label class="visually-hidden" for="task-title">Sarcină nouă</label>
+            <input
+                id="task-title"
+                name="title"
+                type="text"
+                placeholder="Ce ai de făcut?"
+                required
+            >
+            <button type="submit">Adaugă</button>
+        </form>
+
+        <ul class="task-list">
+            {% for task in tasks %}
+                <li class="task-item{% if task.completed %} completed{% endif %}">
+                    <span class="task-title">{{ task.title }}</span>
+                    <div class="task-actions">
+                        <form action="{{ url_for('toggle', task_id=task.id) }}" method="post">
+                            <button class="button button-toggle" type="submit">
+                                {% if task.completed %}Anulează{% else %}Gata{% endif %}
+                            </button>
+                        </form>
+                        <form action="{{ url_for('delete', task_id=task.id) }}" method="post">
+                            <button class="button button-delete" type="submit">Șterge</button>
+                        </form>
+                    </div>
+                </li>
+            {% else %}
+                <li class="empty-state">Nu ai încă sarcini. Adaugă una mai sus.</li>
+            {% endfor %}
+        </ul>
+    </main>
+</body>
+</html>

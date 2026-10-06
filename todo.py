@@ -98,3 +98,15 @@ def mark_task_completed(task_id: int, file_path: FilePath = TASKS_FILE) -> Task:
             save_tasks(tasks, file_path)
             return task
     raise LookupError("Sarcina solicitată nu există.")
+
+
+def toggle_task(task_id: int, file_path: FilePath = TASKS_FILE) -> Task:
+    """Inversează starea sarcinii și întoarce sarcina actualizată."""
+    _validate_task_id(task_id)
+    tasks = load_tasks(file_path)
+    for task in tasks:
+        if task["id"] == task_id:
+            task["completed"] = not task["completed"]
+            save_tasks(tasks, file_path)
+            return task
+    raise LookupError("Sarcina solicitată nu există.")
